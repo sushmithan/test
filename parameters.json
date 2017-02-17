@@ -1,0 +1,60 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "value": "eastus"
+        },
+        "virtualMachineName": {
+            "value": "sharon"
+        },
+        "virtualMachineSize": {
+            "value": "Standard_DS1_v2"
+        },
+        "adminUsername": {
+            "value": "sharn"
+        },
+        "storageAccountName": {
+            "value": "shaadisks560"
+        },
+        "virtualNetworkName": {
+            "value": "SHAA-vnet"
+        },
+        "networkInterfaceName": {
+            "value": "sharon197"
+        },
+        "networkSecurityGroupName": {
+            "value": "sharon-nsg"
+        },
+        "adminPassword": {
+            "value": null
+        },
+        "storageAccountType": {
+            "value": "Premium_LRS"
+        },
+        "diagnosticsStorageAccountName": {
+            "value": "shaadiag712"
+        },
+        "diagnosticsStorageAccountType": {
+            "value": "Standard_LRS"
+        },
+        "diagnosticsStorageAccountId": {
+            "value": "Microsoft.Storage/storageAccounts/shaadiag712"
+        },
+        "addressPrefix": {
+            "value": "10.2.0.0/24"
+        },
+        "subnetName": {
+            "value": "default"
+        },
+        "subnetPrefix": {
+            "value": "10.2.0.0/24"
+        },
+        "publicIpAddressName": {
+            "value": "sharon-ip"
+        },
+        "publicIpAddressType": {
+            "value": "Dynamic"
+        }
+    }
+}
