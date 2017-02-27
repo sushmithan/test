@@ -58,7 +58,7 @@
         }
     },
     "variables": {
-        "vnetId": "[resourceId('SHAA','Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
+        "vnetId": "[resourceId('sudheer','Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
         "subnetRef": "[concat(variables('vnetId'), '/subnets/', parameters('subnetName'))]"
     },
     "resources": [
@@ -83,16 +83,16 @@
                 },
                 "storageProfile": {
                     "imageReference": {
-                        "publisher": "puppet",
-                        "offer": "puppet-enterprise",
-                        "sku": "2016-1",
+                        "publisher": "RedHat",
+                        "offer": "RHEL",
+                        "sku": "7.2",
                         "version": "latest"
                     },
                     "osDisk": {
                         "name": "[parameters('virtualMachineName')]",
                         "createOption": "fromImage",
                         "vhd": {
-                            "uri": "[concat(concat(reference(resourceId('SHAA', 'Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2015-06-15').primaryEndpoints['blob'], 'vhds/'), parameters('virtualMachineName'), '20170215191541.vhd')]"
+                            "uri": "[concat(concat(reference(resourceId('sudheer', 'Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2015-06-15').primaryEndpoints['blob'], 'vhds/'), parameters('virtualMachineName'), '20170223174845.vhd')]"
                         }
                     },
                     "dataDisks": []
@@ -107,14 +107,9 @@
                 "diagnosticsProfile": {
                     "bootDiagnostics": {
                         "enabled": true,
-                        "storageUri": "[reference(resourceId('SHAA', 'Microsoft.Storage/storageAccounts', parameters('diagnosticsStorageAccountName')), '2015-06-15').primaryEndpoints['blob']]"
+                        "storageUri": "[reference(resourceId('sudheer', 'Microsoft.Storage/storageAccounts', parameters('diagnosticsStorageAccountName')), '2015-06-15').primaryEndpoints['blob']]"
                     }
                 }
-            },
-            "plan": {
-                "name": "2016-1",
-                "publisher": "puppet",
-                "product": "puppet-enterprise"
             }
         },
         {
@@ -176,13 +171,13 @@
                             },
                             "privateIPAllocationMethod": "Dynamic",
                             "publicIpAddress": {
-                                "id": "[resourceId('SHAA','Microsoft.Network/publicIpAddresses', parameters('publicIpAddressName'))]"
+                                "id": "[resourceId('sudheer','Microsoft.Network/publicIpAddresses', parameters('publicIpAddressName'))]"
                             }
                         }
                     }
                 ],
                 "networkSecurityGroup": {
-                    "id": "[resourceId('SHAA', 'Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
+                    "id": "[resourceId('sudheer', 'Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
                 }
             }
         },
@@ -203,64 +198,12 @@
             "properties": {
                 "securityRules": [
                     {
-                        "name": "Puppet",
+                        "name": "default-allow-ssh",
                         "properties": {
-                            "priority": 1010,
-                            "sourceAddressPrefix": "*",
-                            "protocol": "TCP",
-                            "destinationPortRange": "8140",
-                            "access": "Allow",
-                            "direction": "Inbound",
-                            "sourcePortRange": "*",
-                            "destinationAddressPrefix": "*"
-                        }
-                    },
-                    {
-                        "name": "MCollective",
-                        "properties": {
-                            "priority": 1020,
-                            "sourceAddressPrefix": "*",
-                            "protocol": "TCP",
-                            "destinationPortRange": "61613",
-                            "access": "Allow",
-                            "direction": "Inbound",
-                            "sourcePortRange": "*",
-                            "destinationAddressPrefix": "*"
-                        }
-                    },
-                    {
-                        "name": "Orchestration",
-                        "properties": {
-                            "priority": 1030,
-                            "sourceAddressPrefix": "*",
-                            "protocol": "TCP",
-                            "destinationPortRange": "8142",
-                            "access": "Allow",
-                            "direction": "Inbound",
-                            "sourcePortRange": "*",
-                            "destinationAddressPrefix": "*"
-                        }
-                    },
-                    {
-                        "name": "SSH",
-                        "properties": {
-                            "priority": 1040,
+                            "priority": 1000,
                             "sourceAddressPrefix": "*",
                             "protocol": "TCP",
                             "destinationPortRange": "22",
-                            "access": "Allow",
-                            "direction": "Inbound",
-                            "sourcePortRange": "*",
-                            "destinationAddressPrefix": "*"
-                        }
-                    },
-                    {
-                        "name": "HTTPS",
-                        "properties": {
-                            "priority": 1050,
-                            "sourceAddressPrefix": "*",
-                            "protocol": "TCP",
-                            "destinationPortRange": "443",
                             "access": "Allow",
                             "direction": "Inbound",
                             "sourcePortRange": "*",
