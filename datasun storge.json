@@ -10,8 +10,9 @@
             "defaultValue": "westus",
             "type": "string"
         },
-        "accountType": {
-            "type": "string"
+        "strgaccountType": {
+            "type": "string",
+             "defaultValue": "Standard_LRS"
         }
     },
       "variables":{},
@@ -22,7 +23,7 @@
             "name": "[parameters('storageAccName')]",
             "location": "[parameters('location')]",
             "properties": {
-                "accountType": "[parameters('accountType')]"
+                "accountType": "[parameters('strgaccountType')]"
             }
         }
      ]
