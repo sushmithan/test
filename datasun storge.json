@@ -22,7 +22,7 @@
             "name": "[parameters('storageAccName')]",
             "location": "[parameters('location')]",
             "properties": {
-                "accountType": "Standard_LRS"
+                "accountType": "[parameters('accountType')]"
             }
         }
      ]
