@@ -4,7 +4,7 @@
       "parameters": {
           "storageAccName":{
             "type": "string",
-            "defaultValue": "storagesush"
+            "defaultValue": "strgsu1"
         },
          "location": {
             "defaultValue": "westus",
