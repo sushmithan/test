@@ -18,7 +18,7 @@
     "variables": {},
     "resources": [
             {
-            "apiVersion":"2015-06-15",
+            "apiVersion": "2016-03-30",
             "type": "Microsoft.Network/publicIPAddresses",
             "name": "[parameters('pIPAddName')]",
             "location":"[parameters('location')]",
