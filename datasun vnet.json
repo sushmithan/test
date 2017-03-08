@@ -21,7 +21,7 @@
     "variables": {},
     "resources": [
               {
-            "apiVersion": "2015-06-15",
+            "apiVersion":"2015-06-15",
             "type": "Microsoft.Network/virtualNetworks",
             "name": "[parameters('vNetName')]",
             "location": "[parameters('location')]",
