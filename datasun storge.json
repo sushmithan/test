@@ -9,6 +9,9 @@
          "location": {
             "defaultValue": "westus",
             "type": "string"
+        },
+        "accountType": {
+            "type": "string"
         }
     },
       "variables":{},
