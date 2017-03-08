@@ -1,0 +1,55 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+            "nicName":{
+            "type": "string",
+            "defaultValue": "nicsush"
+        },
+          "location": {
+            "defaultValue": "westus",
+            "type": "string"
+         },
+            "vNetName":{
+            "type": "string",
+            "defaultValue": "vnetsush"
+        },
+         "pIPAddName":{
+            "defaultValue": "suPip",
+            "type": "string"
+        },
+        "subnetRef":{
+            "type": "string"
+        }
+    },
+    
+    "variables":{},
+    "resources": [
+           {
+            "apiVersion":  "2015-06-15",
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[parameters('nicName')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/publicIPAddresses/', parameters('pIPAddName'))]",
+                "[concat('Microsoft.Network/virtualNetworks/', parameters('vNetName'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses',parameters('pIPAddName'))]"
+                            },
+                            "subnet": {
+                                "id": "[parameters('subnetRef')]"
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    ]
+}
