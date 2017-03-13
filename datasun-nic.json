@@ -17,23 +17,34 @@
          "pIPAddName":{
             "defaultValue": "suPip",
             "type": "string"
+            
         },
         "subnetRef":{
             "type": "string"
+        },
+          "tag": {
+            "type": "object",
+            "defaultValue": {
+                "key1": "key",
+                "value1": "value"
+            },
+            "metadata": {
+                "description": "Tag Values"
+            }
         }
     },
     
     "variables":{},
     "resources": [
            {
+            "comments": "Network Interface Resource",
             "apiVersion":  "2015-06-15",
             "type": "Microsoft.Network/networkInterfaces",
             "name": "[parameters('nicName')]",
             "location": "[parameters('location')]",
-            "dependsOn": [
-                "[concat('Microsoft.Network/publicIPAddresses/', parameters('pIPAddName'))]",
-                "[concat('Microsoft.Network/virtualNetworks/', parameters('vNetName'))]"
-            ],
+            "tags": {
+                "[parameters('tag').key1]": "[parameters('tag').value1]"
+            },
             "properties": {
                 "ipConfigurations": [
                     {
