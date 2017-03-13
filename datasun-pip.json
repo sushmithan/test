@@ -3,7 +3,7 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "pIPAddName":{
-            "defaultValue": "suPip",
+            "defaultValue": "supip",
             "type": "string"
         },
           "location": {
