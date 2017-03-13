@@ -12,6 +12,9 @@
         },
           "uniqueNamePrefix":{
             "type": "string"
+        },
+        "pIPAddType":{
+            "type": "string"
         }
       },
     "variables": {},
@@ -21,7 +24,7 @@
             "type": "Microsoft.Network/publicIPAddresses",
             "name": "[parameters('pIPAddName')]",
             "properties": {
-                "publicIPAllocationMethod":"Dynamic",
+                "publicIPAllocationMethod":"[parameters('pIPAddType')]",
                 "dnsSettings": {
                     "domainNameLabel": "[parameters('uniqueNamePrefix')]"
                 }
