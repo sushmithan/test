@@ -7,7 +7,6 @@
             "type": "string"
         },
           "location": {
-            "defaultValue": "westus",
             "type": "string"
         },
           "uniqueNamePrefix":{
@@ -20,7 +19,8 @@
     "variables": {},
     "resources": [
             {
-            "apiVersion":"2015-06-15",
+            "location":"[parameters('location')]",
+            "apiVersion":"2016-03-30",
             "type": "Microsoft.Network/publicIPAddresses",
             "name": "[parameters('pIPAddName')]",
             "properties": {
