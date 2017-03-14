@@ -55,7 +55,7 @@
                                 "id": "[resourceId('Microsoft.Network/publicIPAddresses',parameters('pIPAddName'))]"
                             },
                             "subnet": {
-                                "id": "[resourceId('Microsoft.Network/networkInterfaces',parameters('subnetRef')]"
+                                "id": "[concat(resourceId('Microsoft.Network/networkInterfaces',parameters('subnetRef'))]"
                             }
                         }
                     }
