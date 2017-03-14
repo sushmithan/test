@@ -42,7 +42,7 @@
             "comments": "Virtual Machine Resource",
             "apiVersion": "2015-06-15",
             "type": "Microsoft.Compute/virtualMachines",
-            "name": "[parameters('vmName')]",
+            "name": "[parameters('vmname')]",
             "location": "[parameters('location')]",
             "properties": {
                 "hardwareProfile": {
