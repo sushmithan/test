@@ -29,7 +29,8 @@
       },
       "nsgName":
   {
-      "type": "string"
+      "type": "string",
+      "defaultValue": "wgnsg"
   },
   "vnetName":
   {
@@ -64,7 +65,7 @@
                   "dnsServers": []
               },
               "enableIPForwarding": false,
-              "networkSecurityGroup": {
+              "nsgName": {
                   "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]"
               }
           }
