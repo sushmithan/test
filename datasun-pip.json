@@ -2,33 +2,34 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "pIPAddName":{
-            "defaultValue": "supip",
+            "location": {
             "type": "string"
         },
-          "location": {
+            "publicIpName":{
+            "defaultValue": "webgoatpip",
             "type": "string"
         },
-          "uniqueNamePrefix":{
+         "publicIpType":{
             "type": "string"
         },
-        "pIPAddType":{
+         "uniqueNamePrefix":{
             "type": "string"
         }
       },
-    "variables": {},
+    "variables":  {},
     "resources": [
-            {
-            "location":"[parameters('location')]",
-            "apiVersion":"2016-03-30",
+         {
             "type": "Microsoft.Network/publicIPAddresses",
-            "name": "[parameters('pIPAddName')]",
+            "name": "[parameters('publicIpName')]",
+            "apiVersion": "2016-03-30",
+            "location": "[parameters('location')]",
             "properties": {
-                "publicIPAllocationMethod":"[parameters('pIPAddType')]",
-                "dnsSettings": {
+                "publicIPAllocationMethod": "[parameters('publicIpType')]",
+                "idleTimeoutInMinutes": 4,
+                "dnsSettings":{
                     "domainNameLabel": "[parameters('uniqueNamePrefix')]"
                 }
             }
-        }
-    ]
+         }
+     ]
 }
