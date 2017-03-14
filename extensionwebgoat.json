@@ -5,18 +5,11 @@
        "location": {
            "type": "string"
              },
-       "tag": {
-           "type": "object",
-           "defaultValue": {
-               "key1": "key",
-               "value1": "value"
-           },
          
-       "vmName": {
+       "vmname": {
            "type": "string"
          
-           }
-       },
+           },
        "vmExtensionName": {
            "type": "string"
        },
@@ -48,7 +41,7 @@
        {
            "comments": "Extension",
            "type": "Microsoft.Compute/virtualMachines/extensions",
-          "name": "webgoat-vm/CustomScriptForLinux",
+          "name": "[concat(parameters('vmname'),'/',parameters('vmExtensionName'))]",
            "apiVersion": "2016-03-30",
            "location": "westus",
            "properties": {
