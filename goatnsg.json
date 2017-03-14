@@ -14,7 +14,6 @@
         {
             "name": "[parameters('nsgName')]",
             "type": "Microsoft.Network/networkSecurityGroups",
-           "name": "[parameters('nsgname')]",
             "apiVersion": "2016-03-30",
             "location": "westus",
             "properties": {
