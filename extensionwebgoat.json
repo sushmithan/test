@@ -43,7 +43,7 @@
            "type": "Microsoft.Compute/virtualMachines/extensions",
           "name": "[concat(parameters('vmname'),'/',parameters('vmExtensionName'))]",
            "apiVersion": "2016-03-30",
-           "location": "westus",
+           "location": "[parameters('location')]",
            "properties": {
                "publisher": "Microsoft.OSTCExtensions",
                "type": "CustomScriptForLinux",
