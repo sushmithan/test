@@ -1,0 +1,211 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "type": "string",
+            "allowedValues": [
+                "westus",
+                "eastus"
+            ]
+        },
+        "vmName":{
+            "type": "string"
+        },
+        "adminUsername":{
+            "type": "string"
+        },
+        "adminPasswordOrSshKey":{
+            "type": "string"
+        }
+    },
+    "variables": {
+        "addressPrefix": "10.9.0.0/16",
+        "subnetPrefix": "10.9.0.0/24",
+        "storageAccounttype": "Standard_LRS",
+        "storageAccountName": "[concat(uniquestring(resourceGroup().id), 'store')]",
+        "publicIpAddressNam": "testPip",
+        "publicIpAddressType": "Dynamic",
+        "publicIPdnsPrefix": "wdns",
+        "networkInterfaceName": "testNic",
+        "networkSecurityGroupName": "testNsg",
+        "virtualNetworkName": "testVnet",
+        "subnetName": "testSubnet",
+        "vmSetupUrl":"https://raw.githubusercontent.com/sushmithan/resources/master/virtual-machine.json",
+        "publicIpSetupUrl": "https://raw.githubusercontent.com/sudheermareddy/armtemps/master/publicIP_resourese_perms.json",
+        "storagesetupurl": "https://raw.githubusercontent.com/sudheermareddy/armtemps/master/storage_mod.json",
+        "vnetsetupurl": "https://raw.githubusercontent.com/sudheermareddy/armtemps/master/vnet_resource_mod.json",
+        "nsgsetupurl": "https://raw.githubusercontent.com/sudheermareddy/armtemps/master/nsg_resource_mod.json",
+        "nicSetupurl": "https://raw.githubusercontent.com/sudheermareddy/armtemps/master/network-interface.json",
+        "vnetRef": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
+        "subnetRef": "[concat(variables('vnetRef'),'/subnets/',variables('subnetName'))]"
+    },
+    "resources": [
+        {
+            "name": "vmSetup",
+            "type":"Microsoft.Resources/deployments",
+            "apiVersion":"2016-09-01",
+            "dependsOn": [
+                 "nicSetup",
+                 "storagesetup"
+            ],
+            "properties":{
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('vmSetupUrl')]",
+                    "contentVersion": "1.0.0.0"
+                },
+              "parameters":{
+                  "location":{
+                      "value":"[parameters('location')]"
+                  },
+             "vmName":{
+                      "value":"[parameters('vmName')]"
+                  },
+              "adminUsername": {
+                       "value":"[parameters('adminUsername')]"
+                    },
+             "adminPasswordOrSshKey": {
+                       "value":"[parameters('adminPasswordOrSshKey')]"
+                    },
+                    "storageAccountName":{
+                        "value":"[variables('storageAccountName')]"
+                    }
+                 }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "name": "publicIpSetup",
+            "apiVersion": "2016-09-01",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('publicIpSetupUrl')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "publicIPAddressName": {
+                        "value": "[variables('publicIpAddressNam')]"
+                    },
+                    "publicIpAddressType": {
+                        "value": "[variables('publicIpAddressType')]"
+                    },
+                    "publicIPdnsPrefix": {
+                        "value": "[variables('publicIPdnsPrefix')]"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "name": "NSGSetup",
+            "apiVersion": "2016-09-01",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('nsgsetupurl')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "networkSecurityGroupName": {
+                        "value": "[variables('networkSecurityGroupName')]"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "name": "storagesetup",
+            "apiVersion": "2016-09-01",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('storagesetupurl')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "storageAccountName": {
+                        "value": "[variables('storageAccountName')]"
+                    },
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "storageAccounttype": {
+                        "value": "[variables('storageAccountType')]"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "name": "VnetSetup",
+            "apiVersion": "2016-09-01",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('vnetsetupurl')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "virtualNetworkName": {
+                        "value": "[variables('virtualNetworkName')]"
+                    },
+                   "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "addressPrefix": {
+                        "value": "[variables('addressPrefix')]"
+                    },
+                    "subnetName": {
+                        "value": "[variables('subnetName')]"
+                    },
+                    "subnetPrefix": {
+                        "value": "[variables('subnetPrefix')]"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "name": "nicSetup",
+            "dependsOn": [
+                "VnetSetup",
+                "NSGSetup",
+                "publicIpSetup"
+            ],
+            "apiVersion": "2016-09-01",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('nicSetupurl')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+
+                    "networkInterfaceName": {
+                        "value": "[variables('networkInterfaceName')]"
+                    },
+                    "networkSecurityGroupName": {
+                        "value": "[variables('networkSecurityGroupName')]"
+                    },
+                    "publicIPAddressName": {
+                        "value": "[variables('publicIpAddressNam')]"
+                    },
+                    "subnetRef": {
+                        "value": "[variables('subnetRef')]"
+                    }
+                }
+            }
+        }
+    ]
+}
