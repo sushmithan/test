@@ -22,7 +22,6 @@
                 "description": "Resource Group of existing Virtual Network."
             }
         },
-        
         "publicIpDNS": {
             "type": "string",
             "metadata": {
@@ -30,31 +29,31 @@
             }
         }
     },
-    "variables": { 
-        "storageRG":"",
-        "publicIpRG":"abg",
-		"imageSku": "payg",
-		"vmName": "XG-Firewall",
-		"vmSize": "Standard_A3",
-		"netNewOrExisting": "existing-newwansubnet",
-		"netName": "XGVNET",
-		"netPrefix": "10.0.0.0/16",
-		"wanName": "WAN",
-		"wanPrefix": "10.0.0.0/24",
-		"lanName": "LAN",
-		"lanPrefix": "10.0.1.0/24",
-		"publicIpNewOrExisting": "new",
-		"publicIpName": "XGPubIP",
-		"storageNewOrExisting": "new",
-		"storageType": "Standard_LRS",
-		"storageEndpoint": "blob.core.windows.net",
-		"storageName": "[concat(uniquestring(resourceGroup().id), 'xgfwsa')]",
-		"location": "[resourceGroup().Location]",
-		"nicWan": "XGWAN",
-		"nicLan": "XGLAN",
-		"networkSecurityGroupName": "XGWANSecurityGroup",
-        "clientnetworkInterfaceName":"clientNIC",
-		"availabilitySetName": "xgAvailabilitySet",
+    "variables": {
+        "storageRG": "",
+        "publicIpRG": "abg",
+        "imageSku": "payg",
+        "vmName": "XG-Firewall",
+        "vmSize": "Standard_A3",
+        "netNewOrExisting": "new",
+        "netName": "XGVNET",
+        "netPrefix": "10.0.0.0/16",
+        "wanName": "WAN",
+        "wanPrefix": "10.0.0.0/24",
+        "lanName": "LAN",
+        "lanPrefix": "10.0.1.0/24",
+        "publicIpNewOrExisting": "new",
+        "publicIpName": "XGPubIP",
+        "storageNewOrExisting": "new",
+        "storageAccountType": "Standard_LRS",
+        "storageEndpoint": "blob.core.windows.net",
+        "storageName": "[concat(uniquestring(resourceGroup().id), 'xgfwsa')]",
+        "location": "[resourceGroup().Location]",
+        "nicWan": "XGWAN",
+        "nicLan": "XGLAN",
+        "networkSecurityGroupName": "XGWANSecurityGroup",
+        "clientnetworkInterfaceName": "clientNIC",
+        "availabilitySetName": "xgAvailabilitySet",
         "publicIpTemplate": "[concat(parameters('baseUrl'),'/shared/publicip-',variables('publicIpNewOrExisting'),'.json')]",
         "netTemplate": "[concat(parameters('baseUrl'),'/shared/vnet-',variables('netNewOrExisting'),'.json')]",
         "storageTemplate": "[concat(parameters('baseUrl'),'/shared/storageAccount-',variables('storageNewOrExisting'),'.json')]",
@@ -73,27 +72,25 @@
         },
         "imagePublisher": "sophos",
         "imageOffer": "sophos-xg",
-        "clientVmName":"clientUser",
-        "clientstorageAccountName":"clientSAN",
-        "clientvirtualMachineSize":"clientVm",
-        "clientfileUris":"clientFu",
-        "clientaddressPrefix":"clientAp",
-        "clientpublicIpAddressName":"clientPIA",
-        "clientsubnetPrefix":"clientSp",
-        "clientsubnetRef":"clientSr",
-        "clientpublicIpdnsPrefix":"clientPip",
-        "clientsubnetName":"clientSN",
-        "clientvirtualMachineName":"clientVmn"
-         },
-    "resources": [
-        {
+        "clientVmName": "clientUser",
+        "clientstorageAccountName": "clientsan",
+        "clientvirtualMachineSize": "clientVm",
+        "clientaddressPrefix": "10.6.0.0/16",
+        "clientpublicIpAddressName": "clientPIA",
+        "clientsubnetPrefix": "10.6.0.0/24",
+        "clientsubnetRef": "clientSr",
+        "clientpublicIpdnsPrefix": "cop",
+        "clientsubnetName": "clientSn",
+        "clientvirtualMachineName": "clientVmn",
+        "clientnsgname": "clientname"
+    },
+    "resources":[
+    {
             "type": "Microsoft.Compute/availabilitySets",
             "name": "[variables('availabilitySetName')]",
             "apiVersion": "[variables('apiVersion').compute]",
             "location": "[variables('location')]",
-            "properties": {
-
-            }
+            "properties": {}
         },
         {
             "name": "SettingUpStorageAccount",
@@ -110,7 +107,7 @@
                         "value": "[variables('storageName')]"
                     },
                     "storageAccountType": {
-                        "value": "[variables('storageType')]"
+                        "value": "[variables('storageAccountType')]"
                     },
                     "storageAccountExistingRG": {
                         "value": "[variables('storageRG')]"
@@ -350,7 +347,7 @@
                 }
             }
         },
-           {
+        {
             "name": "[variables('clientVmName')]",
             "type": "Microsoft.Compute/virtualMachines",
             "apiVersion": "2015-06-15",
@@ -397,35 +394,12 @@
             }
         },
         {
-            "name": "[concat(variables('clientVmName'),'/CustomScriptExtension')]",
-            "type": "Microsoft.Compute/virtualMachines/extensions",
-            "location": "[variables('location')]",
-            "apiVersion": "2015-06-15",
-            "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/', variables('clientVmName'))]"
-            ],
-            "properties": {
-                "publisher": "Microsoft.Compute",
-                "type": "CustomScriptExtension",
-                "typeHandlerVersion": "1.8",
-                "autoUpgradeMinorVersion": true,
-                "settings": {
-                    "fileUris": [
-                       "[variables('clientfileUris')]"
-                    ]
-                },
- "protectedSettings":{
-                    "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File script.ps1')]"
-                }
-            }
-        },
-        {
             "name": "[variables('clientstorageAccountName')]",
             "type": "Microsoft.Storage/storageAccounts",
             "apiVersion": "2015-06-15",
             "location": "[variables('location')]",
             "properties": {
-                "accountType": "[variables('clientstorageAccountName')]"
+                "accountType": "[variables('storageAccountType')]"
             }
         },
         {
@@ -457,7 +431,7 @@
             "dependsOn": [
                 "[concat('Microsoft.Network/virtualNetworks/', variables('clientVmName'))]",
                 "[concat('Microsoft.Network/publicIpAddresses/', variables('clientpublicIpAddressName'))]",
-                "[concat('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupName'))]"
+                "[concat('Microsoft.Network/networkSecurityGroups/', variables('clientnsgname'))]"
             ],
             "properties": {
                 "ipConfigurations": [
@@ -475,7 +449,7 @@
                     }
                 ],
                 "networkSecurityGroup": {
-                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('clientnsgname'))]"
                 }
             }
         },
@@ -492,7 +466,7 @@
             }
         },
         {
-            "name": "[variables('networkSecurityGroupName')]",
+            "name": "[variables('clientnsgname')]",
             "type": "Microsoft.Network/networkSecurityGroups",
             "apiVersion": "2016-09-01",
             "location": "[variables('location')]",
