@@ -1,0 +1,290 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]"
+        },
+        "storageAccName": {
+            "type": "string"
+        },
+        "adminUsername": {
+            "type": "string",
+            "defaultValue": "Sush"
+        },
+        "adminPassword": {
+            "type": "string",
+            "defaultValue": "sush@12345678"
+        }
+    },
+    "variables": {
+        "publicIpType": "Dynamic",
+        "publicIpName": "webgoatpip",
+        "uniqueNamePrefix": "[concat('webg',variables('rg'))]",
+        "rg": "[substring(uniqueString(resourceGroup().id) ,0 ,5)]",
+        "storageAccName": "[concat(parameters('storageAccName'),substring(uniqueString(resourceGroup().id),4,9))]",
+        "storageAccType": "Premium_LRS",
+        "vnetName": "wgvnet",
+        "addressPrefixes": "10.0.0.0/16",
+        "subnetName": "subnet",
+        "subPrefix": "10.0.0.0/24",
+        "nsgName": "webnsg",
+        "nicName": "[concat(variables('uniqueNamePrefix'),'Nic')]",
+        "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('vnetName'))]",
+        "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
+        "imagePublisher": "Canonical",
+        "imageOffer": "UbuntuServer",
+        "vmsize": "Standard_DS1",
+        "OSDiskName": "[concat(variables('uniqueNamePrefix'),'Disk')]",
+        "vmname": "wgvm",
+        "imageVersion": "latest",
+        "imageSKU": "16.10",
+        "vmExtensionName": "webgoatext",
+        "typeHandVersion": "1.4",
+        "customScriptsUrl": "https://raw.githubusercontent.com/pradeepts/testRepo/master/docker-install.sh",
+        "installCommand": "sh docker-install.sh",
+        "storageAccNameurl": "https://raw.githubusercontent.com/sushmithan/test/master/goatstorage.json",
+        "publicIpNameurl": "https://raw.githubusercontent.com/sushmithan/test/master/datasun-pip.json",
+        "vnetNameurl": "https://raw.githubusercontent.com/sushmithan/test/master/goatvnet.json",
+        "nicNameurl": "https://raw.githubusercontent.com/sushmithan/test/master/goatnic.json",
+        "vmnameurl": "https://raw.githubusercontent.com/sushmithan/test/master/goatvm.json",
+        "wgextenurl": "https://raw.githubusercontent.com/sushmithan/test/master/extensionwebgoat.json"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Resources/deployments",
+            "name": "publicIpName",
+            "apiVersion": "2015-01-01",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('publicIpNameurl')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "publicIpName": {
+                        "value": "[variables('publicIpName')]"
+                    },
+                    "uniqueNamePrefix": {
+                        "value": "[variables('uniqueNamePrefix')]"
+                    },
+                    "publicIpType": {
+                        "value": "[variables('publicIpType')]"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "name": "storageAccName",
+            "apiVersion": "2016-09-01",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('storageAccNameurl')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "storageAccName": {
+                        "value": "[variables('storageAccName')]"
+                    },
+                    "storageAccType": {
+                        "value": "[variables('storageAccType')]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "virtualnetName",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2015-01-01",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('vnetNameurl')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "addressPrefixes": {
+                        "value": "[variables('addressPrefixes')]"
+                    },
+                    "vnetName": {
+                        "value": "[variables('vnetName')]"
+                    },
+                    "subnetName": {
+                        "value": "[variables('subnetName')]"
+                    },
+                    "subPrefix": {
+                        "value": "[variables('subPrefix')]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "[variables('nsgName')]",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2016-03-30",
+            "location": "[parameters('location')]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "default-allow-ssh",
+                        "properties": {
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "22",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 1000,
+                            "direction": "Inbound"
+                        }
+                    },
+                    {
+                        "name": "webapp-inbound",
+                        "properties": {
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "8080",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 1010,
+                            "direction": "Inbound"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "name": "nicName",
+            "dependsOn": [
+                "virtualnetName",
+                "publicIpName",
+                "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+            ],
+            "apiVersion": "2015-01-01",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('nicNameurl')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "nicName": {
+                        "value": "[variables('nicName')]"
+                    },
+                    "publicIpName": {
+                        "value": "[variables('publicIpName')]"
+                    },
+                    "subnetRef": {
+                        "value": "[variables('subnetRef')]"
+                    },
+                    "nsgName": {
+                        "value": "[variables('nsgName')]"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "name": "vmname",
+            "dependsOn": [
+                "nicName",
+                "storageAccName"
+            ],
+            "apiVersion": "2015-01-01",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('vmnameurl')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "imagePublisher": {
+                        "value": "[variables('imagePublisher')]"
+                    },
+                    "imageOffer": {
+                        "value": "[variables('imageOffer')]"
+                    },
+                    "vmsize": {
+                        "value": "[variables('vmsize')]"
+                    },
+                    "vmname": {
+                        "value": "[variables('vmname')]"
+                    },
+                    "adminUsername": {
+                        "value": "[parameters('adminUsername')]"
+                    },
+                    "adminPassword": {
+                        "value": "[parameters('adminPassword')]"
+                    },
+                    "storageAccName": {
+                        "value": "[variables('storageAccName')]"
+                    },
+                    "nicName": {
+                        "value": "[variables('nicName')]"
+                    },
+                    "imageVersion": {
+                        "value": "[variables('imageVersion')]"
+                    },
+                    "imageSKU": {
+                        "value": "[variables('imageSKU')]"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "name": "wgexten",
+            "dependsOn": [
+                "vmname"
+            ],
+            "apiVersion": "2015-01-01",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('wgextenurl')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "vmname": {
+                        "value": "[variables('vmname')]"
+                    },
+                    "vmExtensionName": {
+                        "value": "[variables('vmExtensionName')]"
+                    },
+                    "typeHandlerVersion": {
+                        "value": "[variables('typeHandVersion')]"
+                    },
+                    "customScriptsUrl": {
+                        "value": "[variables('customScriptsUrl')]"
+                    },
+                    "commandToExecute": {
+                        "value": "[variables('installCommand')]"
+                    }
+                }
+            }
+        }
+    ]
+}
