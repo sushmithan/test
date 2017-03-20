@@ -1,0 +1,219 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "type": "string",
+            "allowedValues": [
+                "westus",
+                "eastus"
+            ]
+        },
+        "vmName":{
+            "type":"string"
+        },
+        "adminUsername":{
+            "type":"string"
+        },
+        "adminPasswordOrSshKey":{
+            "type":"string"
+        }
+     },
+    "variables": {
+        "addressPrefix": "10.9.0.0/16",
+        "subnetPrefix": "10.9.0.0/24",
+        "storageAccounttype": "Standard_LRS",
+        "storageAccountName": "[concat('store',uniqueString(resourceGroup().id))]",
+        "publicIpAddressName": "testPip",
+        "publicIpAddressType": "Dynamic",
+        "publicIPdnsPrefix": "[concat('dns',uniqueString(resourceGroup().id))]",
+        "networkInterfaceName": "testNic",
+        "networkSecurityGroupName": "testNsg",
+        "virtualNetworkName": "testVnet",
+        "subnetName": "testSubnet",
+        "computeApiVersion":"latest",
+        "vmSize":"sushVms",
+        "imagePublisher":"",
+        "imageOffer":"",
+        "imageSKU":"",
+        "imageVersion":"",
+        "publicIpSetupUrl": "https://raw.githubusercontent.com/sudheermareddy/armtemps/master/publicIP_resourese_perms.json",
+        "storagesetupurl": "https://raw.githubusercontent.com/sudheermareddy/armtemps/master/storage_mod.json",
+        "vnetsetupurl": "https://raw.githubusercontent.com/sudheermareddy/armtemps/master/vnet_resource_mod.json",
+        "nsgsetupurl": "https://raw.githubusercontent.com/sudheermareddy/armtemps/master/nsg_resource_mod.json",
+        "nicSetupurl": "https://raw.githubusercontent.com/sudheermareddy/armtemps/master/network-interface.json",
+        "vnetRef": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
+        "subnetRef": "[concat(variables('vnetRef'),'/subnets/',variables('subnetName'))]"
+    },
+    "resources": [
+          {
+            "name": "[parameters('vmName')]",
+            "comments": "Virtual Machine Resource",
+            "apiVersion": "[variables('computeApiVersion')]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "location": "[parameters('location')]",
+            "tags": {
+                "[parameters('tag').key1]": "[parameters('tag').value1]"
+            },
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[variables('vmSize')]"
+                },
+                "osProfile": {
+                    "computerName": "[parameters('vmName')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPasswordOrSshKey')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "[parameters('imagePublisher')]",
+                        "offer": "[parameters('imageOffer')]",
+                        "sku": "[parameters('imageSKU')]",
+                        "version": "[parameters('imageVersion')]"
+                    },
+                    "osDisk": {
+                        "name": "[concat(parameters('vmName'),'-osDisk')]",
+                        "vhd": {
+                            "uri": "[concat('https://',parameters('storageAccountName'),'.blob.core.windows.net/',parameters('vmStorageAccountContainerName'),'/',parameters('vmName'),'-osdisk.vhd')]"
+                        },
+                        "caching": "ReadWrite",
+                        "createOption": "FromImage"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',parameters('networkInterfaceName'))]"
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "name": "publicIpSetup",
+            "apiVersion": "2015-01-01",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('publicIpSetupUrl')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "publicIPAddressName": {
+                        "value": "[variables('publicIpAddressName')]"
+                    },
+                    "publicIpAddressType": {
+                        "value": "[variables('publicIpAddressType')]"
+                    },
+                    "publicIPdnsPrefix": {
+                        "value": "[variables('publicIPdnsPrefix')]"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "name": "NSGSetup",
+            "apiVersion": "2016-09-01",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('nsgsetupurl')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "locationnsg": {
+                        "value": "[parameters('location')]"
+                    },
+                    "networkSecurityGroupName": {
+                        "value": "[variables('networkSecurityGroupName')]"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "name": "storagesetup",
+            "apiVersion": "2016-09-01",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('storagesetupurl')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "storageAccountName": {
+                        "value": "[variables('storageAccountName')]"
+                    },
+                    "storageAccounttype": {
+                        "value": "[variables('storageAccountType')]"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "name": "VnetSetup",
+            "apiVersion": "2016-09-01",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('vnetsetupurl')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "virtualNetworkName": {
+                        "value": "[variables('virtualNetworkName')]"
+                    },
+                    "addressPrefix": {
+                        "value": "[variables('addressPrefix')]"
+                    },
+                    "subnetName": {
+                        "value": "[variables('subnetName')]"
+                    },
+                    "subnetPrefix": {
+                        "value": "[variables('subnetPrefix')]"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "name": "nicSetup",
+            "dependsOn": [
+                "VnetSetup",
+                "NSGSetup",
+                "publicIpSetup"
+            ],
+            "apiVersion": "2016-09-01",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('nicSetupurl')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "networkInterfaceName": {
+                        "value": "[variables('networkInterfaceName')]"
+                    },
+                    "networkSecurityGroupName": {
+                        "value": "[variables('networkSecurityGroupName')]"
+                    },
+                    "publicIPAddressName": {
+                        "value": "[variables('publicIpAddressName')]"
+                    },
+                    "subnetRef": {
+                        "value": "[variables('subnetRef')]"
+                    }
+                }
+            }
+        }
+    ]
+}
