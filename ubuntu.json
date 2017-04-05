@@ -1,0 +1,193 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "virtualMachines_sushi_name": {
+            "defaultValue": "sushi",
+            "type": "String"
+        },
+        "networkInterfaces_sushi440_name": {
+            "defaultValue": "sushi440",
+            "type": "String"
+        },
+        "networkSecurityGroups_sushi_nsg_name": {
+            "defaultValue": "sushi-nsg",
+            "type": "String"
+        },
+        "publicIPAddresses_sushi_ip_name": {
+            "defaultValue": "sushi-ip",
+            "type": "String"
+        },
+        "virtualNetworks_sushi_vnet_name": {
+            "defaultValue": "sushi-vnet",
+            "type": "String"
+        },
+        "storageAccounts_sushidisks947_name": {
+            "defaultValue": "sushidisks947",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "comments": "Generalized from resource: '/subscriptions/7eab3893-bd71-4690-84a5-47624df0b0e5/resourceGroups/sushi/providers/Microsoft.Compute/virtualMachines/sushi'.",
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[parameters('virtualMachines_sushi_name')]",
+            "apiVersion": "2016-04-30-preview",
+            "location": "westus",
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "Standard_A1_v2"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "Canonical",
+                        "offer": "UbuntuServer",
+                        "sku": "16.04-LTS",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "osType": "Linux",
+                        "name": "[parameters('virtualMachines_sushi_name')]",
+                        "createOption": "FromImage",
+                        "vhd": {
+                            "uri": "[concat('https', '://', parameters('storageAccounts_sushidisks947_name'), '.blob.core.windows.net', concat('/vhds/', parameters('virtualMachines_sushi_name'),'20170404114920.vhd'))]"
+                        },
+                        "caching": "ReadWrite"
+                    },
+                    "dataDisks": []
+                },
+                "osProfile": {
+                    "computerName": "[parameters('virtualMachines_sushi_name')]",
+                    "adminUsername": "[parameters('virtualMachines_sushi_name')]",
+                    "linuxConfiguration": {
+                        "disablePasswordAuthentication": false
+                    },
+                    "secrets": []
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_sushi440_name'))]"
+                        }
+                    ]
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_sushidisks947_name'))]",
+                "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_sushi440_name'))]"
+            ]
+        },
+        {
+            "comments": "Generalized from resource: '/subscriptions/7eab3893-bd71-4690-84a5-47624df0b0e5/resourceGroups/sushi/providers/Microsoft.Network/networkInterfaces/sushi440'.",
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[parameters('networkInterfaces_sushi440_name')]",
+            "apiVersion": "2016-03-30",
+            "location": "westus",
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAddress": "10.3.2.4",
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_sushi_ip_name'))]"
+                            },
+                            "subnet": {
+                                "id": "[concat(resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_sushi_vnet_name')), '/subnets/default')]"
+                            }
+                        }
+                    }
+                ],
+                "dnsSettings": {
+                    "dnsServers": []
+                },
+                "enableIPForwarding": false,
+                "networkSecurityGroup": {
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_sushi_nsg_name'))]"
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_sushi_ip_name'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_sushi_vnet_name'))]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_sushi_nsg_name'))]"
+            ]
+        },
+        {
+            "comments": "Generalized from resource: '/subscriptions/7eab3893-bd71-4690-84a5-47624df0b0e5/resourceGroups/sushi/providers/Microsoft.Network/networkSecurityGroups/sushi-nsg'.",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "[parameters('networkSecurityGroups_sushi_nsg_name')]",
+            "apiVersion": "2016-03-30",
+            "location": "westus",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "default-allow-ssh",
+                        "properties": {
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "22",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 1000,
+                            "direction": "Inbound"
+                        }
+                    }
+                ]
+            },
+            "dependsOn": []
+        },
+        {
+            "comments": "Generalized from resource: '/subscriptions/7eab3893-bd71-4690-84a5-47624df0b0e5/resourceGroups/sushi/providers/Microsoft.Network/publicIPAddresses/sushi-ip'.",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "name": "[parameters('publicIPAddresses_sushi_ip_name')]",
+            "apiVersion": "2016-03-30",
+            "location": "westus",
+            "properties": {
+                "publicIPAllocationMethod": "Dynamic",
+                "idleTimeoutInMinutes": 4
+            },
+            "dependsOn": []
+        },
+        {
+            "comments": "Generalized from resource: '/subscriptions/7eab3893-bd71-4690-84a5-47624df0b0e5/resourceGroups/sushi/providers/Microsoft.Network/virtualNetworks/sushi-vnet'.",
+            "type": "Microsoft.Network/virtualNetworks",
+            "name": "[parameters('virtualNetworks_sushi_vnet_name')]",
+            "apiVersion": "2016-03-30",
+            "location": "westus",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "10.3.2.0/24"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "default",
+                        "properties": {
+                            "addressPrefix": "10.3.2.0/24"
+                        }
+                    }
+                ]
+            },
+            "dependsOn": []
+        },
+        {
+            "comments": "Generalized from resource: '/subscriptions/7eab3893-bd71-4690-84a5-47624df0b0e5/resourceGroups/sushi/providers/Microsoft.Storage/storageAccounts/sushidisks947'.",
+            "type": "Microsoft.Storage/storageAccounts",
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "kind": "Storage",
+            "name": "[parameters('storageAccounts_sushidisks947_name')]",
+            "apiVersion": "2016-01-01",
+            "location": "westus",
+            "tags": {},
+            "properties": {},
+            "dependsOn": []
+        }
+    ]
+}
