@@ -5,8 +5,7 @@
        "location": {
            "type": "string"
              },
-         
-       "vmname": {
+          "vmname": {
            "type": "string"
          
            },
